@@ -32,9 +32,9 @@ Different platforms have different packages; an Android APK does not install on 
 | Android release distribution | Signed APK | Requires privately configured signing key | [Releases](https://github.com/PedroH0309/Verge-App/releases) |
 | Samsung TV (Tizen) | WGT | Upstream source imported; Verge port not built | [TV status](DOWNLOADS.md#televisions) |
 | LG TV (webOS) | IPK | Upstream source imported; Verge port not built | [TV status](DOWNLOADS.md#televisions) |
-| Windows | MSI / installer | Upstream source imported; Verge port not built | [Desktop status](DOWNLOADS.md#desktop) |
-| macOS | DMG | Upstream source imported; Verge port not built | [Desktop status](DOWNLOADS.md#desktop) |
-| Linux | AppImage / DEB / RPM | Upstream source imported; Verge port not built | [Desktop status](DOWNLOADS.md#desktop) |
+| Windows 10/11 x64 | MSI | Windows preview build workflow; installer requires successful CI | [Windows MSI builds](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-desktop.yml) |
+| macOS | DMG | Desktop code imported; packaging and signing not verified | [macOS status](DOWNLOADS.md#linux-and-macos) |
+| Linux | AppImage / DEB / RPM | Desktop code imported; package build pending | [Linux status](DOWNLOADS.md#linux-and-macos) |
 | iPhone / iPad | iOS app | Not distributed as an Android APK | [Platform status](DOWNLOADS.md#ios) |
 
 For installation steps, build instructions and exact artifact names, see **[DOWNLOADS.md](DOWNLOADS.md)**.
@@ -61,10 +61,10 @@ This monorepo follows the general organization of the Nuvio projects:
 | `platforms/tv/` | Nuvio TV Smart source snapshot for future Verge TV porting |
 | `platforms/desktop/` | Nuvio Desktop source snapshot for future Verge Desktop porting |
 | `verge/scripts/` | Original rebranding and validation tooling |
-| `.github/workflows/` | Source import and Android APK workflows |
+| `.github/workflows/` | Source import, Android APK, and Windows MSI build workflows |
 | `docs/` | Source provenance, licensing, and migration notes |
 
-The TV and desktop code trees are preserved as upstream research bases; they are **not** already Verge-branded or tested products.
+The TV source is preserved for future porting. The desktop source has a **Windows preview packaging workflow** that applies Verge branding during the build. A downloadable installer is available only after the Windows workflow succeeds; installation and playback on a real PC remain unverified.
 
 ## Build Android from source
 
