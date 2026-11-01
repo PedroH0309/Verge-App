@@ -6,10 +6,10 @@ Verge is distributed as **separate packages per platform**. Do not attempt to in
 
 ### Preview APK — testing only
 
-1. Open [Verge Android APK workflow](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-android.yml).
-2. Open the latest **successful** run (or use **Run workflow** if Actions are enabled).
-3. Under **Artifacts**, download the archive named **Verge-Android-debug-...**.
-4. Extract the archive and check its `SHA256SUMS.txt` before installing `Verge-Android-TEST-debug.apk`.
+1. Download the publicly available [Verge Android preview APK](https://github.com/PedroH0309/Verge-App/releases/download/android-preview-3/Verge-Android-TEST-debug.apk).
+2. For build details, visit the [successful Android workflow](https://github.com/PedroH0309/Verge-App/actions/runs/41357217932).
+3. If you prefer the CI artifact, download `Verge-Android-debug-3` from the workflow's **Artifacts** section.
+4. Check the APK against [SHA256SUMS.txt](https://github.com/PedroH0309/Verge-App/releases/download/android-preview-3/SHA256SUMS.txt) before installation.
 5. Install the APK on a supported Android phone or tablet. Android may ask for permission to install apps from this source.
 
 Debug builds are for testing and may use an ephemeral signing key. Reinstalling or upgrading across runs may require uninstalling the older build, which can erase app data.
@@ -39,12 +39,12 @@ The original Nuvio TV Smart source and its build steps are documented at https:/
 
 The Windows desktop build uses the original Nuvio Desktop source with a separate **Verge** installer name and upgrade identity. It includes the required Windows media-player runtime in the build, retrieved from a pinned upstream Git LFS revision.
 
-**[Public Windows preview releases](https://github.com/PedroH0309/Verge-App/releases)** (available only after a successful Windows build and publishing job).
+**[Download Windows x64 preview installer (.msi)](https://github.com/PedroH0309/Verge-App/releases/download/windows-preview-7/Verge-Windows-x64-0.1.33-alpha.msi)**
 
 **[Windows MSI build history](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-desktop.yml)**
 
-1. Prefer the newest published Windows preview under **Releases**. If there is no release, open the latest **successful** workflow run.
-2. In a workflow run, under **Artifacts**, download `Verge-Windows-x64-MSI-...`.
+1. Open the [Windows preview release](https://github.com/PedroH0309/Verge-App/releases/tag/windows-preview-7) and download the MSI directly.
+2. Alternatively, download the archive named `Verge-Windows-x64-MSI-7` from the [successful workflow run](https://github.com/PedroH0309/Verge-App/actions/runs/41358335252).
 3. Extract the artifact ZIP to obtain `Verge-Windows-x64-*.msi` and `SHA256SUMS.txt`.
 4. Check the installer hash, then run the MSI on your Windows PC.
 5. Treat this as an **untested preview** until a real Windows installation and playback test succeeds. The installer is not code-signed with a commercial Windows certificate, so Windows SmartScreen may warn.
