@@ -39,10 +39,12 @@ The original Nuvio TV Smart source and its build steps are documented at https:/
 
 The Windows desktop build uses the original Nuvio Desktop source with a separate **Verge** installer name and upgrade identity. It includes the required Windows media-player runtime in the build, retrieved from a pinned upstream Git LFS revision.
 
-**[Open Verge Windows installer builds](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-desktop.yml)**
+**[Public Windows preview releases](https://github.com/PedroH0309/Verge-App/releases)** (available only after a successful Windows build and publishing job).
 
-1. Open the latest **successful** workflow run.
-2. Under **Artifacts**, download `Verge-Windows-x64-MSI-...`.
+**[Windows MSI build history](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-desktop.yml)**
+
+1. Prefer the newest published Windows preview under **Releases**. If there is no release, open the latest **successful** workflow run.
+2. In a workflow run, under **Artifacts**, download `Verge-Windows-x64-MSI-...`.
 3. Extract the artifact ZIP to obtain `Verge-Windows-x64-*.msi` and `SHA256SUMS.txt`.
 4. Check the installer hash, then run the MSI on your Windows PC.
 5. Treat this as an **untested preview** until a real Windows installation and playback test succeeds. The installer is not code-signed with a commercial Windows certificate, so Windows SmartScreen may warn.
