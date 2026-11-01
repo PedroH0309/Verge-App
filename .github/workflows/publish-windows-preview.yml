@@ -1,0 +1,67 @@
+name: Publish Verge Windows Preview
+
+on:
+  workflow_run:
+    workflows: ["Verge Desktop Downloads"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download successful Windows installer artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh run download "$RUN_ID" --repo "$REPOSITORY" \
+            --name "Verge-Windows-x64-MSI-$RUN_NUMBER" \
+            --dir release-files
+          test "$(find release-files -maxdepth 1 -name '*.msi' -type f | wc -l)" -eq 1
+          test -f release-files/SHA256SUMS.txt
+          (cd release-files && sha256sum -c SHA256SUMS.txt)
+
+      - name: Create clearly labeled public Windows preview download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+          SOURCE_COMMIT: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          tag="windows-preview-$RUN_NUMBER"
+          if gh release view "$tag" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            echo "Preview release $tag already exists."
+            exit 0
+          fi
+          cat > release-notes.md <<'EOF'
+          ## Verge Windows x64 preview
+
+          Windows MSI installer, independently packaged from the GPLv3 Nuvio Desktop source tree with Verge branding.
+
+          **Experimental / not yet verified on a physical Windows computer.** This installer is not Authenticode code-signed. Windows may display a security warning. Do not distribute this preview commercially without testing, reviewing third-party license obligations, and validating installation and media playback.
+
+          Files:
+          - Verge-Windows-x64-*.msi — Windows 10/11 x64 preview installer
+          - SHA256SUMS.txt — cryptographic checksums
+
+          Source code and GPLv3 license: https://github.com/PedroH0309/Verge-App
+          EOF
+          gh release create "$tag" release-files/*.msi release-files/SHA256SUMS.txt \
+            --repo "$REPOSITORY" \
+            --title "Verge Windows x64 Preview #$RUN_NUMBER" \
+            --notes-file release-notes.md \
+            --target "$SOURCE_COMMIT" \
+            --prerelease \
+            --latest=false
