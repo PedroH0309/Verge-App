@@ -1,6 +1,12 @@
 name: Verge Android APK
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "androidApp/**"
+      - "composeApp/**"
+      - ".github/workflows/verge-android.yml"
   workflow_dispatch:
     inputs:
       build_type:
@@ -37,6 +43,8 @@ jobs:
           txt=re.sub(r'(?m)^CURRENT_PROJECT_VERSION\s*=.+$','CURRENT_PROJECT_VERSION='+os.environ['GITHUB_RUN_NUMBER'],txt)
           f.write_text(txt)
           PY
+      - name: Prepare required local Gradle properties
+        run: touch local.properties
       - name: Configure private release signing
         if: inputs.build_type == 'release'
         env:
@@ -86,7 +94,7 @@ jobs:
       - name: Upload Android downloads
         uses: actions/upload-artifact@v4
         with:
-          name: Verge-Android-${{ inputs.build_type }}-${{ github.run_number }}
+          name: Verge-Android-${{ inputs.build_type || 'debug' }}-${{ github.run_number }}
           path: downloads/android/
           if-no-files-found: error
           retention-days: 30
