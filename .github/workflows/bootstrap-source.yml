@@ -25,31 +25,25 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Checkout pinned Nuvio Mobile
-        uses: actions/checkout@v4
-        with:
-          repository: NuvioMedia/NuvioMobile
-          ref: 46febb568348aa5e135bff0d4d5c914933aff5a0
-          path: .upstream-mobile
-          persist-credentials: false
-          submodules: false
-
-      - name: Checkout pinned Nuvio TV Smart
-        uses: actions/checkout@v4
-        with:
-          repository: NuvioMedia/NuvioTVSmart
-          ref: c96671616acf35600675f732b378d0e428439b09
-          path: .upstream-tv
-          persist-credentials: false
-
-      - name: Checkout pinned Nuvio Desktop
-        uses: actions/checkout@v4
-        with:
-          repository: NuvioMedia/NuvioDesktop
-          ref: 3e876f699e59e38b66ccc738331fa8071cbf29cc
-          path: .upstream-desktop
-          persist-credentials: false
-          submodules: false
+      - name: Fetch pinned upstream source snapshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          fetch_snapshot() {
+            local url="$1" revision="$2" output="$3"
+            mkdir -p "$output"
+            git -C "$output" init -q
+            git -C "$output" remote add origin "$url"
+            git -C "$output" -c protocol.version=2 fetch --depth=1 origin "$revision"
+            git -C "$output" checkout --detach -q FETCH_HEAD
+            test "$(git -C "$output" rev-parse HEAD)" = "$revision"
+          }
+          fetch_snapshot https://github.com/NuvioMedia/NuvioMobile.git \
+            46febb568348aa5e135bff0d4d5c914933aff5a0 .upstream-mobile
+          fetch_snapshot https://github.com/NuvioMedia/NuvioTVSmart.git \
+            c96671616acf35600675f732b378d0e428439b09 .upstream-tv
+          fetch_snapshot https://github.com/NuvioMedia/NuvioDesktop.git \
+            3e876f699e59e38b66ccc738331fa8071cbf29cc .upstream-desktop
 
       - name: Import original project structures
         shell: bash
