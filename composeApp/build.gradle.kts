@@ -223,6 +223,12 @@ fun readXcconfigValue(file: File, key: String): String? {
         ?.second
 }
 
+// Keep the upstream generated Compose resource namespace. Android and iOS source files
+// still import nuvio.composeapp.generated.resources; only the public app branding changes.
+compose.resources {
+    packageOfResClass = "nuvio.composeapp.generated.resources"
+}
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
