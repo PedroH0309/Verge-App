@@ -53,14 +53,14 @@ This monorepo follows the general organization of the Nuvio projects:
 
 | Directory | Purpose |
 | --- | --- |
-| \`androidApp/\` | Android application entry point and APK configuration |
-| \`composeApp/\` | Shared Kotlin Multiplatform UI and application logic |
-| \`iosApp/\` | Upstream iOS sources; not distributed by this release |
-| \`platforms/tv/\` | Nuvio TV Smart source snapshot for future Verge TV porting |
-| \`platforms/desktop/\` | Nuvio Desktop source snapshot for future Verge Desktop porting |
-| \`verge/scripts/\` | Original rebranding and validation tooling |
-| \`.github/workflows/\` | Source import and Android APK workflows |
-| \`docs/\` | Source provenance, licensing, and migration notes |
+| `androidApp/` | Android application entry point and APK configuration |
+| `composeApp/` | Shared Kotlin Multiplatform UI and application logic |
+| `iosApp/` | Upstream iOS sources; not distributed by this release |
+| `platforms/tv/` | Nuvio TV Smart source snapshot for future Verge TV porting |
+| `platforms/desktop/` | Nuvio Desktop source snapshot for future Verge Desktop porting |
+| `verge/scripts/` | Original rebranding and validation tooling |
+| `.github/workflows/` | Source import and Android APK workflows |
+| `docs/` | Source provenance, licensing, and migration notes |
 
 The TV and desktop code trees are preserved as upstream research bases; they are **not** already Verge-branded or tested products.
 
@@ -68,21 +68,21 @@ The TV and desktop code trees are preserved as upstream research bases; they are
 
 Requirements: JDK 17, Android SDK, internet access for Gradle dependencies.
 
-\`\`\`bash
+```bash
 ./gradlew :androidApp:assembleFullDebug \
   -Pnuvio.android.distribution=full \
   -Pnuvio.ios.distribution=appstore
-\`\`\`
+```
 
 The experimental debug APK is generated at:
 
-\`\`\`text
+```text
 androidApp/build/outputs/apk/full/debug/androidApp-full-debug.apk
-\`\`\`
+```
 
 For a downloadable Android build without configuring Android Studio on your computer, go to **Actions → Verge Android APK → Run workflow**. The build and its result can be inspected in the workflow logs.
 
-A signed production release requires a **private, persistent Android signing keystore**. Do not commit signing keys, passwords or \`local.properties\` to this repository.
+A signed production release requires a **private, persistent Android signing keystore**. Do not commit signing keys, passwords or `local.properties` to this repository.
 
 ## Open source license and credits
 
