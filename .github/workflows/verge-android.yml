@@ -1,0 +1,92 @@
+name: Verge Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: APK type
+        type: choice
+        options: [debug, release]
+        default: debug
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Verge sources
+        run: |
+          test -f androidApp/build.gradle.kts
+          python3 verge/scripts/verify.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Configure version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, os
+          f=Path('iosApp/Configuration/Version.xcconfig')
+          txt=f.read_text()
+          txt=re.sub(r'(?m)^CURRENT_PROJECT_VERSION\s*=.+$','CURRENT_PROJECT_VERSION='+os.environ['GITHUB_RUN_NUMBER'],txt)
+          f.write_text(txt)
+          PY
+      - name: Configure private release signing
+        if: inputs.build_type == 'release'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.VERGE_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.VERGE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.VERGE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.VERGE_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, base64
+          keys=['KEYSTORE_BASE64','KEYSTORE_PASSWORD','KEY_ALIAS','KEY_PASSWORD']
+          if any(not os.environ.get(k) for k in keys): raise SystemExit('Missing signing secrets.')
+          path=pathlib.Path(os.environ['RUNNER_TEMP'])/'verge-release.jks'
+          path.write_bytes(base64.b64decode(os.environ['KEYSTORE_BASE64'],validate=True))
+          path.chmod(0o600)
+          data={
+            'NUVIO_RELEASE_STORE_FILE':str(path),
+            'NUVIO_RELEASE_STORE_PASSWORD':os.environ['KEYSTORE_PASSWORD'],
+            'NUVIO_RELEASE_KEY_ALIAS':os.environ['KEY_ALIAS'],
+            'NUVIO_RELEASE_KEY_PASSWORD':os.environ['KEY_PASSWORD']
+          }
+          if any('\n' in v or '\r' in v for v in data.values()): raise SystemExit('Invalid signing property.')
+          pathlib.Path('local.properties').write_text(''.join(f'{k}={v}\n' for k,v in data.items()))
+          PY
+      - name: Compile APK
+        env:
+          BUILD_TYPE: ${{ inputs.build_type }}
+        run: |
+          set -euo pipefail
+          if [ "$BUILD_TYPE" = "release" ]; then
+            task=assembleFullRelease
+          else
+            task=assembleFullDebug
+          fi
+          ./gradlew ":androidApp:$task" -Pnuvio.android.distribution=full -Pnuvio.ios.distribution=appstore --no-daemon
+          mkdir -p downloads/android
+          if [ "$BUILD_TYPE" = "release" ]; then
+            for apk in androidApp/build/outputs/apk/full/release/*.apk; do
+              test -f "$apk"
+              cp "$apk" "downloads/android/Verge-Android-$(basename "$apk")"
+            done
+          else
+            cp androidApp/build/outputs/apk/full/debug/androidApp-full-debug.apk downloads/android/Verge-Android-TEST-debug.apk
+          fi
+          cd downloads/android
+          sha256sum *.apk > SHA256SUMS.txt
+      - name: Upload Android downloads
+        uses: actions/upload-artifact@v4
+        with:
+          name: Verge-Android-${{ inputs.build_type }}-${{ github.run_number }}
+          path: downloads/android/
+          if-no-files-found: error
+          retention-days: 30
