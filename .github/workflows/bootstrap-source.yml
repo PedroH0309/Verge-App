@@ -1,0 +1,175 @@
+name: Bootstrap Verge from Nuvio sources
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/bootstrap-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verge-source-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: Import Nuvio GPLv3 sources and apply Verge identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    steps:
+      - name: Checkout Verge repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout pinned Nuvio Mobile
+        uses: actions/checkout@v4
+        with:
+          repository: NuvioMedia/NuvioMobile
+          ref: 46febb568348aa5e135bff0d4d5c914933aff5a0
+          path: .upstream-mobile
+          persist-credentials: false
+          submodules: false
+
+      - name: Checkout pinned Nuvio TV Smart
+        uses: actions/checkout@v4
+        with:
+          repository: NuvioMedia/NuvioTVSmart
+          ref: c96671616acf35600675f732b378d0e428439b09
+          path: .upstream-tv
+          persist-credentials: false
+
+      - name: Checkout pinned Nuvio Desktop
+        uses: actions/checkout@v4
+        with:
+          repository: NuvioMedia/NuvioDesktop
+          ref: 3e876f699e59e38b66ccc738331fa8071cbf29cc
+          path: .upstream-desktop
+          persist-credentials: false
+          submodules: false
+
+      - name: Import original project structures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs platforms/tv platforms/desktop
+          cp .upstream-mobile/README.md docs/NUVIO_MOBILE_README.md
+          cp .upstream-tv/README.md docs/NUVIO_TV_README.md
+          cp .upstream-desktop/README.md docs/NUVIO_DESKTOP_README.md
+          cp .upstream-mobile/LICENSE LICENSE
+          rsync -a --exclude='.git' --exclude='.github/workflows/' --exclude='README.md' --exclude='LICENSE' \
+            --exclude='MPVKit/' --exclude='local.properties' .upstream-mobile/ ./
+          rsync -a --exclude='.git' --exclude='README.md' --exclude='node_modules/' \
+            --exclude='dist/' --exclude='*.wgt' --exclude='*.ipk' \
+            .upstream-tv/ platforms/tv/
+          rsync -a --exclude='.git' --exclude='README.md' --exclude='build/' --exclude='node_modules/' \
+            --exclude='MPVKit/' .upstream-desktop/ platforms/desktop/
+          cp .upstream-tv/LICENSE platforms/tv/LICENSE
+          cp .upstream-desktop/LICENSE platforms/desktop/LICENSE
+          {
+            echo 'Mobile: 46febb568348aa5e135bff0d4d5c914933aff5a0 (cmp-rewrite)'
+            echo 'TV: c96671616acf35600675f732b378d0e428439b09 (main)'
+            echo 'Desktop: 3e876f699e59e38b66ccc738331fa8071cbf29cc (Dev)'
+          } > docs/SOURCE_REVISIONS.txt
+          rm -rf .upstream-mobile .upstream-tv .upstream-desktop
+          test -f androidApp/build.gradle.kts
+          test -f platforms/tv/package.json
+          test -f platforms/desktop/build.gradle.kts
+
+      - name: Install original branding renderer
+        shell: bash
+        run: python3 -m pip install --user 'Pillow>=10,<13'
+
+      - name: Apply Verge Android branding
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 verge/scripts/rebrand.py --version 0.1.0 --version-code 1
+          python3 verge/scripts/verify.py
+          echo 'Nuvio authors and GPLv3 copyright are preserved.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check GitHub file-size limit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          skip_dirs={'.git'}
+          too_big=[]
+          for p in Path('.').rglob('*'):
+              if not p.is_file() or skip_dirs.intersection(p.parts): continue
+              if p.stat().st_size >= 95*1024*1024:
+                  too_big.append(str(p))
+                  p.unlink()
+          if too_big:
+              Path('docs/OMITTED_LARGE_BINARIES.txt').write_text(
+                  'Large upstream binary files omitted due to GitHub size limits:\n' +
+                  '\n'.join(too_big) + '\n')
+              print('Omitted oversized upstream binary files:',too_big)
+          else:
+              print('No files exceed the GitHub object size safety threshold.')
+          PY
+
+      - name: Commit imported sources to Verge main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "verge-source-bootstrap[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -f
+          if git diff --cached --quiet; then
+            echo "No import changes to commit."
+          else
+            git commit -m "feat: import original Nuvio Mobile, TV and Desktop sources for Verge"
+            git push origin HEAD:main
+          fi
+
+  android-preview:
+    name: Compile the first Verge Android APK
+    needs: import
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout imported Verge source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Check Android project import
+        run: |
+          test -f androidApp/build.gradle.kts
+          python3 verge/scripts/verify.py
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Configure Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build fullDebug Android APK
+        run: ./gradlew :androidApp:assembleFullDebug -Pnuvio.android.distribution=full -Pnuvio.ios.distribution=appstore --no-daemon --stacktrace
+
+      - name: Save Android test APK and SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p downloads/android
+          cp androidApp/build/outputs/apk/full/debug/androidApp-full-debug.apk downloads/android/Verge-Android-TEST-debug.apk
+          cd downloads/android
+          sha256sum Verge-Android-TEST-debug.apk > SHA256SUMS.txt
+
+      - name: Upload Android test download
+        uses: actions/upload-artifact@v4
+        with:
+          name: Verge-Android-bootstrap-preview
+          path: downloads/android/
+          if-no-files-found: error
+          retention-days: 30
