@@ -1,0 +1,2 @@
+Large upstream binary files omitted due to GitHub size limits:
+platforms/desktop/composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll
