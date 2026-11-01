@@ -1,0 +1,117 @@
+name: Verge Desktop Downloads
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/verge-desktop.yml"
+      - "verge/scripts/rebrand_desktop.py"
+      - "platforms/desktop/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verge-desktop-windows-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    name: Windows x64 MSI (preview)
+    runs-on: windows-2022
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: platforms/desktop
+    env:
+      WEBVIEW2_VERSION: "1.0.4078.44"
+      DESKTOP_UPSTREAM_REV: "3e876f699e59e38b66ccc738331fa8071cbf29cc"
+    steps:
+      - name: Check out Verge source
+        uses: actions/checkout@v4
+
+      - name: Prepare Verge identity and graphics
+        working-directory: .
+        run: |
+          python -m pip install "Pillow>=10,<13"
+          if ($LASTEXITCODE -ne 0) { throw "Pillow installation failed" }
+          python verge/scripts/rebrand_desktop.py
+          if ($LASTEXITCODE -ne 0) { throw "Desktop identity preparation failed" }
+
+      - name: Restore pinned upstream Windows libmpv LFS runtime
+        run: |
+          $ErrorActionPreference = "Stop"
+          $asset = "composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll"
+          $source = Join-Path $env:RUNNER_TEMP "nuvio-desktop-runtime"
+          New-Item -ItemType Directory -Path $source -Force | Out-Null
+          git -C $source init -q
+          if ($LASTEXITCODE -ne 0) { throw "Cannot initialize upstream runtime repository" }
+          git -C $source remote add origin https://github.com/NuvioMedia/NuvioDesktop.git
+          git -C $source config core.sparseCheckout true
+          $sparse = Join-Path $source ".git/info/sparse-checkout"
+          Set-Content -Path $sparse -Value $asset -Encoding ascii
+          git -C $source lfs install --local
+          if ($LASTEXITCODE -ne 0) { throw "Git LFS unavailable" }
+          git -C $source fetch --depth=1 origin $env:DESKTOP_UPSTREAM_REV
+          if ($LASTEXITCODE -ne 0) { throw "Cannot fetch pinned upstream desktop commit" }
+          $env:GIT_LFS_SKIP_SMUDGE = "1"
+          git -C $source checkout --detach FETCH_HEAD
+          if ($LASTEXITCODE -ne 0) { throw "Cannot check out pinned upstream commit" }
+          Remove-Item Env:GIT_LFS_SKIP_SMUDGE
+          git -C $source lfs pull --include=$asset --exclude=""
+          if ($LASTEXITCODE -ne 0) { throw "Cannot restore upstream libmpv runtime" }
+          $from = Join-Path $source $asset
+          if (-not (Test-Path $from)) { throw "Upstream libmpv file missing" }
+          if ((Get-Item $from).Length -lt 1000000) { throw "Upstream LFS file is still a pointer" }
+          Copy-Item -Path $from -Destination (Join-Path (Get-Location) $asset) -Force
+          Write-Host "Restored pinned upstream LGPL player runtime."
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Create optional Gradle runtime configuration
+        run: |
+          if (-not (Test-Path local.properties)) { New-Item -ItemType File -Path local.properties | Out-Null }
+
+      - name: Install Microsoft WebView2 SDK
+        run: |
+          nuget install Microsoft.Web.WebView2 -Version $env:WEBVIEW2_VERSION -OutputDirectory "$env:RUNNER_TEMP\nuget" -DirectDownload -NonInteractive -NoCache
+          if ($LASTEXITCODE -ne 0) { throw "WebView2 SDK download failed" }
+          $sdk = Join-Path $env:RUNNER_TEMP "nuget\Microsoft.Web.WebView2.$env:WEBVIEW2_VERSION"
+          if (-not (Test-Path (Join-Path $sdk "build\native\x64\WebView2Loader.dll.lib"))) { throw "Missing WebView2 import library" }
+          "WEBVIEW2_ROOT=$sdk" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Compile Verge Windows MSI
+        run: |
+          & .\gradlew.bat :composeApp:packageReleaseMsi "-Pnuvio.webview2.dir=$env:WEBVIEW2_ROOT" "-Pcompose.desktop.packaging.checkJdkVendor=false" --no-configuration-cache --no-daemon --stacktrace
+          if ($LASTEXITCODE -ne 0) { throw "Windows MSI compilation failed" }
+
+      - name: Verify and package Windows installer
+        run: |
+          $ErrorActionPreference = "Stop"
+          $msi = Get-ChildItem -Path "composeApp\build\compose\release-msis" -Filter "Verge-Windows-x64-*.msi" -File | Select-Object -First 1
+          if ($null -eq $msi) { throw "Verge Windows MSI not produced" }
+          if ($msi.Length -lt 1000000) { throw "MSI file is unexpectedly small" }
+          $dest = Join-Path $env:GITHUB_WORKSPACE "downloads\windows"
+          New-Item -ItemType Directory -Path $dest -Force | Out-Null
+          Copy-Item $msi.FullName -Destination (Join-Path $dest $msi.Name)
+          $sha = (Get-FileHash -Path (Join-Path $dest $msi.Name) -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  $($msi.Name)" | Out-File -FilePath (Join-Path $dest "SHA256SUMS.txt") -Encoding ascii
+          Write-Host "Windows MSI preview generated; actual installation remains untested."
+
+      - name: Upload independent Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Verge-Windows-x64-MSI-${{ github.run_number }}
+          path: downloads/windows/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
