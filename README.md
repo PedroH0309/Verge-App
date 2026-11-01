@@ -8,7 +8,7 @@
 
 An independent fork of [Nuvio Mobile](https://github.com/NuvioMedia/NuvioMobile), with original Verge branding and a standalone Android package identity.
 
-[**Android APK downloads**](DOWNLOADS.md#android) · [**TV builds**](DOWNLOADS.md#televisions) · [**Desktop builds**](DOWNLOADS.md#desktop) · [**Source credits**](docs/UPSTREAM.md)
+[**Android APK downloads**](https://github.com/PedroH0309/Verge-App/releases/tag/android-preview-3) · [**Windows PC installer**](https://github.com/PedroH0309/Verge-App/releases/tag/windows-preview-7) · [**TV builds**](DOWNLOADS.md#televisions) · [**Desktop builds**](DOWNLOADS.md#desktop) · [**Source credits**](docs/UPSTREAM.md)
 
 </div>
 
@@ -20,7 +20,7 @@ Verge is an experimental media application based on the GNU GPLv3-licensed Nuvio
 
 Verge is **not affiliated with or endorsed by NuvioMedia**. This project does not provide films, television channels, copyrighted streams or unauthorized media sources. Connect only services and media you are entitled to access.
 
-> **Project status:** Early preview. The Android APK must be compiled and tested before general distribution. The presence of a repository or download link does not guarantee a working build.
+> **Project status:** Early preview. Android and Windows packages have passed automated builds, but installation and playback on real devices remain unverified. These previews are not signed, tested production releases.
 
 ## Downloads
 
@@ -28,11 +28,11 @@ Different platforms have different packages; an Android APK does not install on 
 
 | Platform | Package | Status | Download page |
 | --- | --- | --- | --- |
-| Android phones / tablets | APK | Automated build pipeline; testing required | [Android builds](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-android.yml) |
+| Android phones / tablets | APK | Experimental debug APK built; real-device testing needed | [Download Android APK](https://github.com/PedroH0309/Verge-App/releases/download/android-preview-3/Verge-Android-TEST-debug.apk) |
 | Android release distribution | Signed APK | Requires privately configured signing key | [Releases](https://github.com/PedroH0309/Verge-App/releases) |
 | Samsung TV (Tizen) | WGT | Upstream source imported; Verge port not built | [TV status](DOWNLOADS.md#televisions) |
 | LG TV (webOS) | IPK | Upstream source imported; Verge port not built | [TV status](DOWNLOADS.md#televisions) |
-| Windows 10/11 x64 | MSI | Windows preview build workflow; installer requires successful CI | [Windows MSI builds](https://github.com/PedroH0309/Verge-App/actions/workflows/verge-desktop.yml) |
+| Windows 10/11 x64 | MSI | Preview installer compiled; real-device testing needed | [Download Windows MSI](https://github.com/PedroH0309/Verge-App/releases/download/windows-preview-7/Verge-Windows-x64-0.1.33-alpha.msi) |
 | macOS | DMG | Desktop code imported; packaging and signing not verified | [macOS status](DOWNLOADS.md#linux-and-macos) |
 | Linux | AppImage / DEB / RPM | Desktop code imported; package build pending | [Linux status](DOWNLOADS.md#linux-and-macos) |
 | iPhone / iPad | iOS app | Not distributed as an Android APK | [Platform status](DOWNLOADS.md#ios) |
@@ -64,7 +64,7 @@ This monorepo follows the general organization of the Nuvio projects:
 | `.github/workflows/` | Source import, Android APK, and Windows MSI build workflows |
 | `docs/` | Source provenance, licensing, and migration notes |
 
-The TV source is preserved for future porting. The desktop source has a **Windows preview packaging workflow** that applies Verge branding during the build. A downloadable installer is available only after the Windows workflow succeeds; installation and playback on a real PC remain unverified.
+The TV source is preserved for future porting. The desktop source has a Windows preview packaging workflow that applies Verge branding during the build. The Windows MSI has passed automated packaging, while installation and playback on a real PC remain unverified.
 
 ## Build Android from source
 
