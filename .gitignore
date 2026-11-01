@@ -37,3 +37,7 @@ iosApp/Configuration/DeviceSigning.local.json
 
 # Local MPVKit iOS build environment (sparse APFS image, see MPVKit docs)
 .mpvkit-build.sparseimage
+
+# Nuvio Desktop Kotlin sources named core/build are not generated build outputs.
+!platforms/desktop/composeApp/src/**/kotlin/com/nuvio/app/core/build/
+!platforms/desktop/composeApp/src/**/kotlin/com/nuvio/app/core/build/**
