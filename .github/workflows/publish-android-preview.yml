@@ -1,0 +1,65 @@
+name: Publish Verge Android Preview
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/publish-android-preview.yml"]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    name: Publish already compiled Android debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve the verified successful Android build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh run download 41357217932 --repo "$REPOSITORY" \
+            --name "Verge-Android-debug-3" --dir release-files
+          test -f release-files/Verge-Android-TEST-debug.apk
+          test -f release-files/SHA256SUMS.txt
+          (cd release-files && sha256sum -c SHA256SUMS.txt)
+
+      - name: Publish public early Android preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="android-preview-3"
+          if gh release view "$tag" --repo "$REPOSITORY" >/dev/null 2>&1; then
+            echo "Android preview already published."
+            exit 0
+          fi
+          cat > notes.md <<'EOF'
+          ## Verge Android Preview
+
+          **Experimental Android APK**, built from the GNU GPLv3-licensed Nuvio Mobile source with Verge branding.
+
+          This artifact comes from the successful Android CI run #41357217932:
+          https://github.com/PedroH0309/Verge-App/actions/runs/41357217932
+
+          **Not a stable or commercially verified release.** This is a debug-signed test package, which can have different signing certificates across builds. App upgrades may require uninstalling previous test builds and losing their data. Installation and playback must be tested on a real Android device.
+
+          Files:
+          - Verge-Android-TEST-debug.apk — Android test package
+          - SHA256SUMS.txt — verification checksum
+
+          Source code and GPLv3: https://github.com/PedroH0309/Verge-App
+          EOF
+          gh release create "$tag" \
+            release-files/Verge-Android-TEST-debug.apk \
+            release-files/SHA256SUMS.txt \
+            --repo "$REPOSITORY" \
+            --title "Verge Android Preview #3" \
+            --target bd7701a4eccb0e639726eb5ec4860c4d17e9e0a6 \
+            --notes-file notes.md \
+            --prerelease \
+            --latest=false
