@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark.png" alt="Verge" width="320" />
+
 # VERGE
 
 **An open-source media experience built for your screens.**
