@@ -65,7 +65,10 @@ jobs:
           $from = Join-Path $source $asset
           if (-not (Test-Path $from)) { throw "Upstream libmpv file missing" }
           if ((Get-Item $from).Length -lt 1000000) { throw "Upstream LFS file is still a pointer" }
-          Copy-Item -Path $from -Destination (Join-Path (Get-Location) $asset) -Force
+          $destFile = Join-Path (Get-Location) $asset
+          New-Item -ItemType Directory -Path (Split-Path $destFile -Parent) -Force | Out-Null
+          Copy-Item -Path $from -Destination $destFile -Force
+          if ((Get-Item $destFile).Length -lt 1000000) { throw "Restored Windows native player runtime is invalid" }
           Write-Host "Restored pinned upstream LGPL player runtime."
 
       - name: Set up Java 17
