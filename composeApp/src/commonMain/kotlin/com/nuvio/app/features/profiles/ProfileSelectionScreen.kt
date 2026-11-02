@@ -332,9 +332,10 @@ private fun ProfileAvatarCard(
         parseHexColor(profile.avatarColorHex)
     }
     val avatars by AvatarRepository.avatars.collectAsStateWithLifecycle()
-    val avatarItem = remember(profile.avatarId, avatars) {
-        profile.avatarId?.let { id -> avatars.find { it.id == id } }
+    val avatarItem = remember(profile.avatarId, profile.avatarColorHex, profile.avatarUrl, avatars) {
+        avatarForProfile(profile, avatars)
     }
+    val localAvatarId = avatarItem?.id?.takeIf(::isVergeAvatarId)
     val avatarImageUrl = remember(profile.avatarUrl, avatarItem) {
         profileAvatarImageUrl(profile, avatarItem)
     }
@@ -377,7 +378,7 @@ private fun ProfileAvatarCard(
             modifier = Modifier.size(110.dp),
             contentAlignment = Alignment.Center,
         ) {
-            if (avatarImageUrl != null) {
+            if (avatarImageUrl != null || localAvatarId != null) {
                 val bgColor = avatarItem?.bgColor?.let { parseHexColor(it) } ?: avatarColor
                 Box(
                     modifier = Modifier
@@ -404,7 +405,13 @@ private fun ProfileAvatarCard(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                if (avatarImageUrl != null) {
+                if (localAvatarId != null) {
+                    VergeAvatarPortrait(
+                        id = localAvatarId,
+                        contentDescription = avatarItem?.displayName ?: profile.name,
+                        modifier = Modifier.size(100.dp).clip(CircleShape),
+                    )
+                } else if (avatarImageUrl != null) {
                     AsyncImage(
                         model = avatarImageUrl,
                         contentDescription = avatarItem?.displayName ?: profile.name,
