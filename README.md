@@ -39,6 +39,8 @@ Different platforms have different packages; an Android APK does not install on 
 
 For installation steps, build instructions and exact artifact names, see **[DOWNLOADS.md](DOWNLOADS.md)**.
 
+> **Release note:** Changes committed to `main` are not automatically present in older downloadable previews. For the new offline avatar feature, use a build whose source commit includes `VergeAvatarPresets.kt`; verify the source revision in the GitHub Actions run before installing.
+
 ## Latest development: profiles and library
 
 - Eight original **offline-first Verge avatars**, available without the Nuvio avatar service.
