@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,6 +88,12 @@ private fun AvatarChoiceItem(
                 modifier = Modifier.fillMaxSize().clip(CircleShape),
             )
         } else {
+            // A failed remote thumbnail should still be a visible, selectable option.
+            Text(
+                text = avatar.displayName.take(1).uppercase(),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+            )
             AsyncImage(
                 model = avatarImageUrl(avatar),
                 contentDescription = avatar.displayName,
