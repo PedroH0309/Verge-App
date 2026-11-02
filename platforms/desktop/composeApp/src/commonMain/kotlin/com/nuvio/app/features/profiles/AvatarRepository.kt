@@ -62,7 +62,7 @@ object AvatarRepository {
     private val log = Logger.withTag("AvatarRepository")
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
-    private val _avatars = MutableStateFlow<List<AvatarCatalogItem>>(emptyList())
+    private val _avatars = MutableStateFlow<List<AvatarCatalogItem>>(vergeAvatarPresets)
     val avatars: StateFlow<List<AvatarCatalogItem>> = _avatars.asStateFlow()
 
     private var standardCatalog = emptyList<AvatarCatalogItem>()
@@ -75,6 +75,8 @@ object AvatarRepository {
     private var memberFetchInFlight = false
     private var hasMemberAccess = false
     private var lastStandardRefresh: TimeMark? = null
+    // Avoid repeatedly hammering the original Nuvio backend if it is unavailable.
+    private var lastStandardAttempt: TimeMark? = null
     private var lastMemberRefresh: TimeMark? = null
 
     suspend fun shareableImageUrl(profile: NuvioProfile): String? {
@@ -95,7 +97,8 @@ object AvatarRepository {
     suspend fun fetchAvatars() {
         hydrateFromCacheIfNeeded()
         ensureMemberAccessObserver()
-        if (standardLoaded && standardCatalog.isNotEmpty()) {
+        if ((standardLoaded && standardCatalog.isNotEmpty()) ||
+            !isRefreshDue(lastStandardAttempt)) {
             publishCatalog()
             return
         }
@@ -105,7 +108,7 @@ object AvatarRepository {
     suspend fun refreshAvatars(force: Boolean = false) {
         hydrateFromCacheIfNeeded()
         ensureMemberAccessObserver()
-        if (force || isRefreshDue(lastStandardRefresh)) {
+        if (force || (isRefreshDue(lastStandardRefresh) && isRefreshDue(lastStandardAttempt))) {
             fetchStandardCatalog()
         }
         if (hasMemberAccess && (force || isRefreshDue(lastMemberRefresh))) {
@@ -163,6 +166,7 @@ object AvatarRepository {
     private suspend fun fetchStandardCatalog() {
         if (standardFetchInFlight) return
         standardFetchInFlight = true
+        lastStandardAttempt = TimeSource.Monotonic.markNow()
         try {
             val result = SupabaseProvider.client.postgrest.rpc("get_avatar_catalog")
             val items = result.decodeList<AvatarCatalogItem>()
@@ -260,10 +264,14 @@ object AvatarRepository {
     }
 
     private fun publishCatalog() {
-        _avatars.value = availableAvatarCatalog(
+        // Keep built-in Verge choices visible even while offline or on RPC failure.
+        val remote = availableAvatarCatalog(
             standardCatalog = standardCatalog,
             memberCatalog = memberCatalog,
             hasMemberAccess = hasMemberAccess,
         )
+        _avatars.value = vergeAvatarPresets + remote.filterNot { remoteAvatar ->
+            vergeAvatarPresets.any { it.id == remoteAvatar.id }
+        }
     }
 }
