@@ -41,6 +41,17 @@ For installation steps, build instructions and exact artifact names, see **[DOWN
 
 > **Release note:** Changes committed to `main` are not automatically present in older downloadable previews. For the new offline avatar feature, use a build whose source commit includes `VergeAvatarPresets.kt`; verify the source revision in the GitHub Actions run before installing.
 
+## Why does my Nuvio library not appear in Verge?
+
+Verge is a different application, with separate storage and profile settings. It cannot automatically read Nuvio's installed addons or personal library.
+
+- **Home** displays discoverable catalogs from enabled addon manifests. If nothing is installed, open **Set up catalogs** (new preview) or **Settings → Content Discovery → Addons** and add the manifest URL of an authorized metadata catalog.
+- **Library** is your personal saved list. Open a title from Home or Search and save it to populate this tab.
+- Signed-in tracking integrations (where authorized) may synchronize your saved items, but a Verge login does not automatically migrate Nuvio data or third-party subscriptions.
+- The catalog is metadata, **not** a promise of licensed playback links. Verge does not bundle pirated streaming sources.
+
+See [Library, setup and Live TV](docs/LIBRARY_AND_LIVE_TV.md) for full details.
+
 ## Latest development: profiles and library
 
 - Eight original **offline-first Verge avatars**, available without the Nuvio avatar service.
