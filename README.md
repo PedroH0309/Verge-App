@@ -8,7 +8,7 @@
 
 An independent fork of [Nuvio Mobile](https://github.com/NuvioMedia/NuvioMobile), with original Verge branding and a standalone Android package identity.
 
-[**Android APK downloads**](https://github.com/PedroH0309/Verge-App/releases/tag/android-preview-3) · [**Windows PC installer**](https://github.com/PedroH0309/Verge-App/releases/tag/windows-preview-7) · [**TV builds**](DOWNLOADS.md#televisions) · [**Desktop builds**](DOWNLOADS.md#desktop) · [**Source credits**](docs/UPSTREAM.md)
+[**Android APK downloads**](https://github.com/PedroH0309/Verge-App/releases/tag/android-preview-3) · [**Windows PC installer**](https://github.com/PedroH0309/Verge-App/releases/tag/windows-preview-8) · [**TV builds**](DOWNLOADS.md#televisions) · [**Desktop builds**](DOWNLOADS.md#desktop) · [**Source credits**](docs/UPSTREAM.md)
 
 </div>
 
@@ -32,7 +32,7 @@ Different platforms have different packages; an Android APK does not install on 
 | Android release distribution | Signed APK | Requires privately configured signing key | [Releases](https://github.com/PedroH0309/Verge-App/releases) |
 | Samsung TV (Tizen) | WGT | Upstream source imported; Verge port not built | [TV status](DOWNLOADS.md#televisions) |
 | LG TV (webOS) | IPK | Upstream source imported; Verge port not built | [TV status](DOWNLOADS.md#televisions) |
-| Windows 10/11 x64 | MSI | Preview installer compiled; real-device testing needed | [Download Windows MSI](https://github.com/PedroH0309/Verge-App/releases/download/windows-preview-7/Verge-Windows-x64-0.1.33-alpha.msi) |
+| Windows 10/11 x64 | MSI | Preview installer compiled; real-device testing needed | [Download Windows MSI](https://github.com/PedroH0309/Verge-App/releases/download/windows-preview-8/Verge-Windows-x64-0.1.34-alpha.msi) |
 | macOS | DMG | Desktop code imported; packaging and signing not verified | [macOS status](DOWNLOADS.md#linux-and-macos) |
 | Linux | AppImage / DEB / RPM | Desktop code imported; package build pending | [Linux status](DOWNLOADS.md#linux-and-macos) |
 | iPhone / iPad | iOS app | Not distributed as an Android APK | [Platform status](DOWNLOADS.md#ios) |
