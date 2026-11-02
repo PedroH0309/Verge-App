@@ -2537,4 +2537,7 @@
     <string name="settings_playback_page_up_next">A seguir</string>
     <string name="compose_settings_page_layout">Layout</string>
     <string name="settings_group_you">Você</string>
+    <string name="verge_catalog_setup_title">Configure os catálogos do Verge</string>
+    <string name="verge_catalog_setup_message">As prateleiras do Nuvio vêm de complementos. O Verge não importa automaticamente as fontes instaladas no outro aplicativo. Adicione aqui catálogos autorizados para descobrir filmes e séries; os títulos salvos ficam na aba Biblioteca.</string>
+    <string name="verge_catalog_setup_action">Configurar catálogos</string>
 </resources>

@@ -143,6 +143,7 @@ internal fun AppTabHost(
                         continueWatchingDisintegrationRequest = state.continueWatchingDisintegrationRequest,
                         onFolderClick = actions.onFolderClick,
                         onFirstCatalogRendered = actions.onInitialHomeContentRendered,
+                        onConfigureSources = actions.onAddonsSettingsClick,
                     )
                 }
             }
@@ -171,6 +172,7 @@ internal fun AppTabHost(
                     onPreviewClick = actions.onPosterClick,
                     onPreviewLongClick = actions.onPosterLongClick,
                     onDownloadsClick = actions.onDownloadsClick,
+                    onConfigureSources = actions.onAddonsSettingsClick,
                     disintegrationRequest = state.libraryDisintegrationRequest,
                 )
             }

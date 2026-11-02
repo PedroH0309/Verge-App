@@ -2476,4 +2476,7 @@
     <string name="stream_info_subtitle_source_embedded">Embutida</string>
     <string name="stream_info_player_engine">Mecanismo do player</string>
     <string name="stream_info_server">Servidor</string>
+    <string name="verge_catalog_setup_title">Configure os catálogos do Verge</string>
+    <string name="verge_catalog_setup_message">As prateleiras do Nuvio vêm de complementos. O Verge não importa automaticamente as fontes instaladas no outro aplicativo. Adicione aqui catálogos autorizados para descobrir filmes e séries; os títulos salvos ficam na aba Biblioteca.</string>
+    <string name="verge_catalog_setup_action">Configurar catálogos</string>
 </resources>

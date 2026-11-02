@@ -132,6 +132,7 @@ fun HomeScreen(
     continueWatchingDisintegrationRequest: DisintegrationRequest<String>? = null,
     onFolderClick: ((collectionId: String, folderId: String) -> Unit)? = null,
     onFirstCatalogRendered: (() -> Unit)? = null,
+    onConfigureSources: (() -> Unit)? = null,
 ) {
     LaunchedEffect(Unit) {
         withContext(Dispatchers.Default) {
@@ -1113,8 +1114,10 @@ fun HomeScreen(
                                     modifier = Modifier.padding(
                                         horizontal = if (isDesktop) homeSectionPadding else 16.dp,
                                     ),
-                                    title = stringResource(Res.string.home_empty_no_sources_title),
-                                    message = stringResource(Res.string.home_empty_no_sources_message),
+                                    title = stringResource(Res.string.verge_catalog_setup_title),
+                                    message = stringResource(Res.string.verge_catalog_setup_message),
+                                    actionLabel = if (onConfigureSources != null) stringResource(Res.string.verge_catalog_setup_action) else null,
+                                    onActionClick = onConfigureSources,
                                 )
                             }
                         }
@@ -1151,14 +1154,16 @@ fun HomeScreen(
                                 ),
                                 message = homeUiState.errorMessage
                                     ?: stringResource(Res.string.home_empty_no_rows_message),
-                                actionLabel = if (loadFailed) stringResource(Res.string.action_retry) else null,
+                                actionLabel = if (loadFailed) stringResource(Res.string.action_retry)
+                                    else if (onConfigureSources != null) stringResource(Res.string.verge_catalog_setup_action)
+                                    else null,
                                 onActionClick = if (loadFailed) {
                                     {
                                         NetworkStatusRepository.requestRefresh(force = true)
                                         HomeRepository.refresh(addonsUiState.addons.enabledAddons(), force = true)
                                     }
                                 } else {
-                                    null
+                                    onConfigureSources
                                 },
                             )
                         }

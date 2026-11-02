@@ -118,6 +118,7 @@ fun LibraryScreen(
     onPreviewClick: ((MetaPreview) -> Unit)? = null,
     onPreviewLongClick: ((MetaPreview) -> Unit)? = null,
     onDownloadsClick: (() -> Unit)? = null,
+    onConfigureSources: (() -> Unit)? = null,
     disintegrationRequest: DisintegrationRequest<String>? = null,
 ) {
     val uiState by remember {
@@ -493,6 +494,10 @@ fun LibraryScreen(
                                     LibrarySourceMode.SIMKL -> stringResource(Res.string.library_simkl_empty_message)
                                     LibrarySourceMode.MDBLIST -> stringResource(Res.string.library_mdblist_empty_message)
                                 },
+                                actionLabel = if (uiState.sourceMode == LibrarySourceMode.LOCAL && onConfigureSources != null) {
+                                    stringResource(Res.string.verge_catalog_setup_action)
+                                } else null,
+                                onActionClick = if (uiState.sourceMode == LibrarySourceMode.LOCAL) onConfigureSources else null,
                             )
                         }
                     }

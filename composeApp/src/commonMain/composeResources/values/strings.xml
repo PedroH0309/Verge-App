@@ -2537,4 +2537,7 @@
     <string name="subtitle_shadow_opacity">Shadow opacity</string>
     <string name="subtitle_shadow_size">Shadow size</string>
     <string name="subtitle_reset_appearance">Reset appearance</string>
+    <string name="verge_catalog_setup_title">Set up your Verge catalogs</string>
+    <string name="verge_catalog_setup_message">Nuvio shelves come from addons. Verge cannot automatically import sources installed in the other app. Add authorized catalogs here to browse movies and shows; saved titles appear in Library.</string>
+    <string name="verge_catalog_setup_action">Set up catalogs</string>
 </resources>

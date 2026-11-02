@@ -66,3 +66,21 @@ Official reference pages:
 - Eight local Verge profile avatars allow immediate selection without the upstream RPC.
 - GIF avatars animate on hover instead of continuously on the desktop.
 - A full live-TV catalog, rights-managed EPG and channel player are not implemented yet; the above is a design proposal, not a claim that Band, Record, SBS or Premiere currently play inside Verge.
+
+## Where is the Nuvio catalog in Verge?
+
+The **Home** shelves and the **Library** tab are distinct:
+
+- **Home**: discovers titles from installed, enabled catalogs provided by supported addons.
+- **Library**: shows titles the user saved under their current profile, optionally with configured tracking integrations.
+- Independent Verge installations do **not** automatically receive Nuvio's addon configuration, streaming sources, account sessions, or saved lists. This is an operating-system and service-level separation, not a missing screen.
+
+### First-run setup
+
+When Home has no catalogs, Verge now displays **Set up catalogs**. It opens the existing addon management screen, where users can enter the manifest URL of an authorized catalog source. On successful import, the existing HomeRepository logic can build the same-style Nuvio shelves; no bypassed or unauthorized streams are bundled.
+
+When the personal Library is empty, its **Set up catalogs** shortcut helps users discover titles before saving them to the Library.
+
+If catalog rows are still empty, inspect the addon status, its catalog manifest, enabled state, authentication and network connectivity. A manifest that contains only stream resolvers does not necessarily provide any browsable catalog rows.
+
+The original Nuvio account and third-party streaming permissions are not automatically portable to the Verge fork.
