@@ -79,11 +79,19 @@ private fun AvatarChoiceItem(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
-            model = avatarImageUrl(avatar),
-            contentDescription = avatar.displayName,
-            modifier = Modifier.fillMaxSize().clip(CircleShape),
-            contentScale = ContentScale.Crop,
-        )
+        if (isVergeAvatarId(avatar.id)) {
+            VergeAvatarPortrait(
+                id = avatar.id,
+                contentDescription = avatar.displayName,
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
+            )
+        } else {
+            AsyncImage(
+                model = avatarImageUrl(avatar),
+                contentDescription = avatar.displayName,
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                contentScale = ContentScale.Crop,
+            )
+        }
     }
 }
