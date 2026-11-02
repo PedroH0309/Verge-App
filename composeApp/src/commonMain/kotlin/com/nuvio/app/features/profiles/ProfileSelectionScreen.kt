@@ -345,10 +345,10 @@ private fun ProfileAvatarCard(
     val animOffset = remember { Animatable(30f) }
 
     LaunchedEffect(Unit) {
-        delay(animDelay.toLong() + 150)
-        launch { animAlpha.animateTo(1f, tween(450, easing = FastOutSlowInEasing)) }
-        launch { animScale.animateTo(1f, tween(500, easing = FastOutSlowInEasing)) }
-        launch { animOffset.animateTo(0f, tween(500, easing = FastOutSlowInEasing)) }
+        delay(animDelay.toLong() + 60)
+        launch { animAlpha.animateTo(1f, tween(300, easing = FastOutSlowInEasing)) }
+        launch { animScale.animateTo(1f, tween(340, easing = FastOutSlowInEasing)) }
+        launch { animOffset.animateTo(0f, tween(340, easing = FastOutSlowInEasing)) }
     }
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -412,6 +412,13 @@ private fun ProfileAvatarCard(
                         modifier = Modifier.size(100.dp).clip(CircleShape),
                     )
                 } else if (avatarImageUrl != null) {
+                    // Keep the profile recognizable if the remote image cannot load.
+                    Text(
+                        text = profile.name.take(1).uppercase(),
+                        color = avatarColor,
+                        style = MaterialTheme.typography.headlineLarge.copy(fontSize = 38.sp),
+                        fontWeight = FontWeight.Bold,
+                    )
                     AsyncImage(
                         model = avatarImageUrl,
                         contentDescription = avatarItem?.displayName ?: profile.name,
