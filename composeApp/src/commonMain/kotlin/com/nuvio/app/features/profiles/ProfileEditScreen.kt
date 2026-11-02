@@ -73,7 +73,9 @@ fun ProfileEditScreen(
     val fallbackColorHex = currentProfile?.avatarColorHex ?: PROFILE_COLORS.first()
 
     var name by rememberSaveable { mutableStateOf(currentProfile?.name ?: "") }
-    var selectedAvatarId by rememberSaveable { mutableStateOf(currentProfile?.avatarId) }
+    var selectedAvatarId by rememberSaveable {
+        mutableStateOf(currentProfile?.avatarId ?: vergeAvatarFromColor(currentProfile?.avatarColorHex)?.id)
+    }
     var avatarUrl by rememberSaveable { mutableStateOf(currentProfile?.avatarUrl.orEmpty()) }
     var selectedBackgroundId by rememberSaveable { mutableStateOf(currentProfile?.profileBackgroundId) }
     var selectedBackgroundUrl by rememberSaveable { mutableStateOf(currentProfile?.profileBackgroundUrl) }
@@ -287,7 +289,7 @@ fun ProfileEditScreen(
                             ProfileRepository.createProfile(
                                 name = name,
                                 avatarColorHex = avatarColorHex,
-                                avatarId = if (customAvatarUrl == null) selectedAvatarId else null,
+                                avatarId = selectedAvatarId.takeIf { customAvatarUrl == null && !isVergeAvatarId(it) },
                                 avatarUrl = customAvatarUrl,
                                 usesPrimaryAddons = usesPrimaryAddons,
                             )
@@ -296,7 +298,7 @@ fun ProfileEditScreen(
                                 profileIndex = currentProfile!!.profileIndex,
                                 name = name,
                                 avatarColorHex = avatarColorHex,
-                                avatarId = if (customAvatarUrl == null) selectedAvatarId else null,
+                                avatarId = selectedAvatarId.takeIf { customAvatarUrl == null && !isVergeAvatarId(it) },
                                 avatarUrl = customAvatarUrl,
                                 profileBackgroundId = selectedBackgroundId,
                                 profileBackgroundUrl = selectedBackgroundUrl,
@@ -427,6 +429,12 @@ private fun ProfileIdentityCard(
                             contentDescription = name,
                             modifier = Modifier.size(88.dp).clip(CircleShape),
                             contentScale = ContentScale.Crop,
+                        )
+                    } else if (selectedAvatar != null && isVergeAvatarId(selectedAvatar.id)) {
+                        VergeAvatarPortrait(
+                            id = selectedAvatar.id,
+                            contentDescription = selectedAvatar.displayName,
+                            modifier = Modifier.size(88.dp).clip(CircleShape),
                         )
                     } else if (selectedAvatar != null) {
                         AsyncImage(
