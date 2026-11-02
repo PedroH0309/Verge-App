@@ -18,6 +18,11 @@ on:
 permissions:
   contents: read
 
+# Only the newest commit should consume a full Android build runner.
+concurrency:
+  group: verge-android-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
