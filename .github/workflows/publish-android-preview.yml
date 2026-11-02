@@ -1,10 +1,9 @@
 name: Publish Verge Android Preview
 
 on:
-  push:
-    branches: [main]
-    paths: [".github/workflows/publish-android-preview.yml"]
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Verge Android APK"]
+    types: [completed]
 
 permissions:
   actions: read
@@ -12,28 +11,42 @@ permissions:
 
 jobs:
   publish:
-    name: Publish already compiled Android debug APK
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Retrieve the verified successful Android build
+      - name: Retrieve successful Android debug APK
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
         run: |
           set -euo pipefail
-          gh run download 41357217932 --repo "$REPOSITORY" \
-            --name "Verge-Android-debug-3" --dir release-files
+          artifact="Verge-Android-debug-$RUN_NUMBER"
+          available="$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[].name')"
+          if ! grep -Fxq "$artifact" <<< "$available"; then
+            echo "Only debug APKs are automatically published as public previews."
+            echo "SKIP_RELEASE=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          gh run download "$RUN_ID" --repo "$REPOSITORY" --name "$artifact" --dir release-files
           test -f release-files/Verge-Android-TEST-debug.apk
           test -f release-files/SHA256SUMS.txt
           (cd release-files && sha256sum -c SHA256SUMS.txt)
 
-      - name: Publish public early Android preview
+      - name: Publish experimental Android preview on GitHub Releases
+        if: env.SKIP_RELEASE != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+          SOURCE_COMMIT: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          tag="android-preview-3"
+          tag="android-preview-$RUN_NUMBER"
           if gh release view "$tag" --repo "$REPOSITORY" >/dev/null 2>&1; then
             echo "Android preview already published."
             exit 0
@@ -41,25 +54,21 @@ jobs:
           cat > notes.md <<'EOF'
           ## Verge Android Preview
 
-          **Experimental Android APK**, built from the GNU GPLv3-licensed Nuvio Mobile source with Verge branding.
+          Experimental GPLv3-derived Android APK with original Verge branding and offline profile avatars.
 
-          This artifact comes from the successful Android CI run #41357217932:
-          https://github.com/PedroH0309/Verge-App/actions/runs/41357217932
+          **Debug-signed build for testing, not a verified commercial release.**
+          Upgrades across debug builds may require uninstalling and can erase local application data. Before sharing, test installation, playback, profiles and library on a physical Android device.
 
-          **Not a stable or commercially verified release.** This is a debug-signed test package, which can have different signing certificates across builds. App upgrades may require uninstalling previous test builds and losing their data. Installation and playback must be tested on a real Android device.
-
-          Files:
           - Verge-Android-TEST-debug.apk — Android test package
-          - SHA256SUMS.txt — verification checksum
+          - SHA256SUMS.txt — integrity checksum
 
-          Source code and GPLv3: https://github.com/PedroH0309/Verge-App
+          Corresponding GPLv3 source code: https://github.com/PedroH0309/Verge-App
           EOF
-          gh release create "$tag" \
-            release-files/Verge-Android-TEST-debug.apk \
+          gh release create "$tag" release-files/Verge-Android-TEST-debug.apk \
             release-files/SHA256SUMS.txt \
             --repo "$REPOSITORY" \
-            --title "Verge Android Preview #3" \
-            --target bd7701a4eccb0e639726eb5ec4860c4d17e9e0a6 \
+            --title "Verge Android Preview #$RUN_NUMBER" \
             --notes-file notes.md \
+            --target "$SOURCE_COMMIT" \
             --prerelease \
             --latest=false
