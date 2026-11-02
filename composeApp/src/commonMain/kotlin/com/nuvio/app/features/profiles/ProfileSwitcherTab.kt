@@ -582,9 +582,10 @@ private fun PopupProfileBubble(
 ) {
     val tokens = MaterialTheme.nuvio
     val avatarColor = remember(profile.avatarColorHex) { parseHexColor(profile.avatarColorHex) }
-    val avatarItem = remember(profile.avatarId, avatars) {
-        profile.avatarId?.let { id -> avatars.find { it.id == id } }
+    val avatarItem = remember(profile.avatarId, profile.avatarColorHex, profile.avatarUrl, avatars) {
+        avatarForProfile(profile, avatars)
     }
+    val localAvatarId = avatarItem?.id?.takeIf(::isVergeAvatarId)
     val avatarImageUrl = remember(profile.avatarUrl, avatarItem) {
         profileAvatarImageUrl(profile, avatarItem)
     }
@@ -643,7 +644,7 @@ private fun PopupProfileBubble(
                     .size(48.dp)
                     .clip(tokens.shapes.avatar)
                     .background(
-                        if (avatarImageUrl != null) {
+                        if (avatarImageUrl != null || localAvatarId != null) {
                             avatarItem?.bgColor?.let { parseHexColor(it) } ?: avatarColor
                         } else {
                             avatarColor.copy(alpha = 0.15f)
@@ -671,7 +672,13 @@ private fun PopupProfileBubble(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                if (avatarImageUrl != null) {
+                if (localAvatarId != null) {
+                    VergeAvatarPortrait(
+                        id = localAvatarId,
+                        contentDescription = profile.name,
+                        modifier = Modifier.size(48.dp).clip(tokens.shapes.avatar),
+                    )
+                } else if (avatarImageUrl != null) {
                     AsyncImage(
                         model = avatarImageUrl,
                         contentDescription = profile.name,
@@ -762,9 +769,10 @@ fun ActiveProfileMiniAvatar(
     }
 
     val avatarColor = remember(profile.avatarColorHex) { parseHexColor(profile.avatarColorHex) }
-    val avatarItem = remember(profile.avatarId, avatars) {
-        profile.avatarId?.let { id -> avatars.find { it.id == id } }
+    val avatarItem = remember(profile.avatarId, profile.avatarColorHex, profile.avatarUrl, avatars) {
+        avatarForProfile(profile, avatars)
     }
+    val localAvatarId = avatarItem?.id?.takeIf(::isVergeAvatarId)
     val avatarImageUrl = remember(profile.avatarUrl, avatarItem) {
         profileAvatarImageUrl(profile, avatarItem)
     }
@@ -780,7 +788,7 @@ fun ActiveProfileMiniAvatar(
             .size(size.dp)
             .clip(tokens.shapes.avatar)
             .background(
-                if (avatarImageUrl != null) {
+                if (avatarImageUrl != null || localAvatarId != null) {
                     avatarItem?.bgColor?.let { parseHexColor(it) } ?: avatarColor
                 } else {
                     avatarColor.copy(alpha = 0.15f)
@@ -789,7 +797,13 @@ fun ActiveProfileMiniAvatar(
             .border(tokens.borders.thin + NuvioTokens.Space.hairline, borderColor, tokens.shapes.avatar),
         contentAlignment = Alignment.Center,
     ) {
-        if (avatarImageUrl != null) {
+        if (localAvatarId != null) {
+            VergeAvatarPortrait(
+                id = localAvatarId,
+                contentDescription = profile.name,
+                modifier = Modifier.size(size.dp).clip(tokens.shapes.avatar),
+            )
+        } else if (avatarImageUrl != null) {
             AsyncImage(
                 model = avatarImageUrl,
                 contentDescription = profile.name,
