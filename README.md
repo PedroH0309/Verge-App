@@ -39,6 +39,16 @@ Different platforms have different packages; an Android APK does not install on 
 
 For installation steps, build instructions and exact artifact names, see **[DOWNLOADS.md](DOWNLOADS.md)**.
 
+## Latest development: profiles and library
+
+- Eight original **offline-first Verge avatars**, available without the Nuvio avatar service.
+- Faster profile transitions and less continuous animation on desktop avatar images.
+- Local profile color identifies the Verge avatar without sending unrecognized avatar IDs to the original Nuvio account backend.
+- Existing Nuvio-style library shelves, sorting, lists, personal saves and progress tracking remain intact.
+- A licensed Live TV design is documented, **not** a claim that third-party broadcasters are currently available.
+
+Read the [Library and Live TV roadmap](docs/LIBRARY_AND_LIVE_TV.md).
+
 ## Features inherited from Nuvio Mobile
 
 - Cross-platform mobile UI using Kotlin and Compose Multiplatform.
