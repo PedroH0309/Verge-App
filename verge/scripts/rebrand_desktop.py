@@ -153,8 +153,8 @@ def patch_runtime_identity() -> None:
     # Bump above previous 0.1.33-alpha Windows preview so an MSI upgrade is possible.
     version = DESKTOP / "composeApp/Configuration/DesktopVersion.properties"
     text = version.read_text(encoding="utf-8")
-    text = replace_once(text, "VERSION_NAME=0.1.33-alpha", "VERSION_NAME=0.1.34-alpha")
-    text = replace_once(text, "VERSION_CODE=33", "VERSION_CODE=34")
+    text = replace_once(text, "VERSION_NAME=0.1.33-alpha", "VERSION_NAME=0.1.35-alpha")
+    text = replace_once(text, "VERSION_CODE=33", "VERSION_CODE=35")
     version.write_text(text, encoding="utf-8")
 
 
