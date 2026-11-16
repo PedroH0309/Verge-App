@@ -6,6 +6,13 @@ on:
     paths:
       - "androidApp/**"
       - "composeApp/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
+      - "gradle/**"
+      - "gradlew"
+      - "verge/scripts/verify.py"
+      - "iosApp/Configuration/Version.xcconfig"
       - ".github/workflows/verge-android.yml"
   workflow_dispatch:
     inputs:
